@@ -106,11 +106,27 @@ class _GamePreviewState extends State<GamePreview> {
       body: Center(
         child: Gameboard(board: board, activeTetromino: activeTetromino),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: rotateTetromino,
-        backgroundColor: Colors.white,
-        child: const Icon(Icons.rotate_left, color: Colors.black,),
-        ),
+      floatingActionButton: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          FloatingActionButton(
+            onPressed: rotateTetromino,
+            backgroundColor: Colors.white,
+            child: const Icon(Icons.rotate_left, color: Colors.black),
+          ),
+          FloatingActionButton(
+            onPressed: moveTetrominoLeft,
+            backgroundColor: Colors.white,
+            child: const Icon(Icons.arrow_left_outlined),
+            ),
+            FloatingActionButton(
+            onPressed: moveTetrominoRight,
+            backgroundColor: Colors.white,
+            child: const Icon(Icons.arrow_right_outlined),
+            ),
+        ],
+      ),
+
     );
   }
 
@@ -141,6 +157,36 @@ class _GamePreviewState extends State<GamePreview> {
           type: activeTetromino.type,
           rotationIndex: newRotation,
           position: activeTetromino.position,
+        );
+      });
+    }
+  }
+
+  void moveTetrominoLeft() {
+    final newPosition = (activeTetromino.position + Vector2(-1, 0));
+
+    //Comprobar colisiones antes de desplazar
+    if (!checkCollision(newPosition, activeTetromino.rotationIndex)) {
+      setState(() {
+        activeTetromino = ActiveTetromino(
+          type: activeTetromino.type,
+          rotationIndex: activeTetromino.rotationIndex,
+          position: newPosition,
+        );
+      });
+    }
+  }
+
+  void moveTetrominoRight() {
+    final newPosition = (activeTetromino.position + Vector2(1, 0));
+
+    //Comprobar colisiones antes de desplazar
+    if (!checkCollision(newPosition, activeTetromino.rotationIndex)) {
+      setState(() {
+        activeTetromino = ActiveTetromino(
+          type: activeTetromino.type,
+          rotationIndex: activeTetromino.rotationIndex,
+          position: newPosition,
         );
       });
     }
