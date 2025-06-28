@@ -23,19 +23,73 @@ class _GamePreviewState extends State<GamePreview> {
 
     board = List.generate(26, (_) => List.generate(10, (_) => null));
     activeTetromino = ActiveTetromino(
-      type: TetrominoType.T,
+      type: TetrominoType.values[DateTime.now().millisecondsSinceEpoch % 7],
       rotationIndex: 0,
       position: Vector2(4, 0),
     );
 
-    gravityTimer = Timer.periodic(const Duration(seconds: 1), (_) {
-      setState(() {
+    gravityTimer = Timer.periodic(const Duration(milliseconds: 500), (_) {
+      final nextPos = activeTetromino.position + Vector2(0, 1);
+      final colides = checkCollision(nextPos, activeTetromino.rotationIndex);
+
+      if (colides) {
+        //Fijar la ficha en el tablero
+        final blocks = tetrominoDataMap[activeTetromino.type]!
+            .rotations[activeTetromino.rotationIndex];
+
+        bool gameover = false;
+
+        for (final block in blocks) {
+          final x = activeTetromino.position.x + block.x;
+          final y = activeTetromino.position.y + block.y;
+
+          if (y >= 0 && y < 26 && x >= 0 && x < 10) {
+            if (y < 6) gameover = true; //Supera el limite superior
+
+            board[y.toInt()][x.toInt()] =
+                tetrominoDataMap[activeTetromino.type]!.color;
+          }
+        }
+
+        if (gameover) {
+          gravityTimer?.cancel(); //Detiene la gravedad
+          gravityTimer = null;
+
+          showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (_) => AlertDialog(
+              title: const Text('GAME OVER'),
+              content: const Text('exceeded the allowed play area'),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    //Reiniciar app o cerrar
+                  },
+                  child: const Text('OK'),
+                ),
+              ],
+            ),
+          );
+          return;
+        }
+
+        //Crear nueva ficha
         activeTetromino = ActiveTetromino(
-          type: activeTetromino.type,
-          rotationIndex: activeTetromino.rotationIndex,
-          position: activeTetromino.position + Vector2(0, 1), // mover abajo
+          type: TetrominoType.values[DateTime.now().millisecondsSinceEpoch % 7],
+          rotationIndex: 0,
+          position: Vector2(4, 0),
         );
-      });
+      } else {
+        setState(() {
+          activeTetromino = ActiveTetromino(
+            type: activeTetromino.type,
+            rotationIndex: activeTetromino.rotationIndex,
+            position: activeTetromino.position + Vector2(0, 1), // mover abajo
+          );
+        });
+      }
     });
   }
 
@@ -53,5 +107,22 @@ class _GamePreviewState extends State<GamePreview> {
         child: Gameboard(board: board, activeTetromino: activeTetromino),
       ),
     );
+  }
+
+  bool checkCollision(Vector2 newPosition, int rotationIndex) {
+    final blocks =
+        tetrominoDataMap[activeTetromino.type]!.rotations[rotationIndex];
+
+    for (final block in blocks) {
+      final x = newPosition.x + block.x;
+      final y = newPosition.y + block.y;
+
+      //Limites del tablero
+      if (x < 0 || x >= 10 || y >= 26) return true;
+
+      //Colision otra ficha colocada
+      if (y >= 0 && board[y.toInt()][x.toInt()] != null) return true;
+    }
+    return false;
   }
 }
