@@ -106,6 +106,11 @@ class _GamePreviewState extends State<GamePreview> {
       body: Center(
         child: Gameboard(board: board, activeTetromino: activeTetromino),
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: rotateTetromino,
+        backgroundColor: Colors.white,
+        child: const Icon(Icons.rotate_left, color: Colors.black,),
+        ),
     );
   }
 
@@ -124,5 +129,20 @@ class _GamePreviewState extends State<GamePreview> {
       if (y >= 0 && board[y.toInt()][x.toInt()] != null) return true;
     }
     return false;
+  }
+
+  void rotateTetromino() {
+    final newRotation = (activeTetromino.rotationIndex + 1) % 4;
+
+    //Comprobar colisiones antes de rotar
+    if (!checkCollision(activeTetromino.position, newRotation)) {
+      setState(() {
+        activeTetromino = ActiveTetromino(
+          type: activeTetromino.type,
+          rotationIndex: newRotation,
+          position: activeTetromino.position,
+        );
+      });
+    }
   }
 }
