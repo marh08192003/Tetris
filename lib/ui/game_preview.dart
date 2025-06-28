@@ -28,69 +28,92 @@ class _GamePreviewState extends State<GamePreview> {
       position: Vector2(4, 0),
     );
 
+    startGravity();
+  }
+
+  void startGravity() {
     gravityTimer = Timer.periodic(const Duration(milliseconds: 500), (_) {
       final nextPos = activeTetromino.position + Vector2(0, 1);
       final colides = checkCollision(nextPos, activeTetromino.rotationIndex);
 
       if (colides) {
-        //Fijar la ficha en el tablero
-        final blocks = tetrominoDataMap[activeTetromino.type]!
-            .rotations[activeTetromino.rotationIndex];
-
-        bool gameover = false;
-
-        for (final block in blocks) {
-          final x = activeTetromino.position.x + block.x;
-          final y = activeTetromino.position.y + block.y;
-
-          if (y >= 0 && y < 26 && x >= 0 && x < 10) {
-            if (y < 6) gameover = true; //Supera el limite superior
-
-            board[y.toInt()][x.toInt()] =
-                tetrominoDataMap[activeTetromino.type]!.color;
-          }
-        }
-
-        if (gameover) {
-          gravityTimer?.cancel(); //Detiene la gravedad
-          gravityTimer = null;
-
-          showDialog(
-            context: context,
-            barrierDismissible: false,
-            builder: (_) => AlertDialog(
-              title: const Text('GAME OVER'),
-              content: const Text('exceeded the allowed play area'),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    //Reiniciar app o cerrar
-                  },
-                  child: const Text('OK'),
-                ),
-              ],
-            ),
-          );
-          return;
-        }
-
-        //Crear nueva ficha
-        activeTetromino = ActiveTetromino(
-          type: TetrominoType.values[DateTime.now().millisecondsSinceEpoch % 7],
-          rotationIndex: 0,
-          position: Vector2(4, 0),
-        );
+        fixTetromino();
       } else {
         setState(() {
           activeTetromino = ActiveTetromino(
             type: activeTetromino.type,
             rotationIndex: activeTetromino.rotationIndex,
-            position: activeTetromino.position + Vector2(0, 1), // mover abajo
+            position: nextPos,
           );
         });
       }
     });
+  }
+
+  void fixTetromino() {
+    final blocks = tetrominoDataMap[activeTetromino.type]!
+        .rotations[activeTetromino.rotationIndex];
+
+    bool gameover = false;
+
+    for (final block in blocks) {
+      final x = activeTetromino.position.x + block.x;
+      final y = activeTetromino.position.y + block.y;
+
+      if (y >= 0 && y < 26 && x >= 0 && x < 10) {
+        if (y < 6) gameover = true;
+        board[y.toInt()][x.toInt()] =
+            tetrominoDataMap[activeTetromino.type]!.color;
+      }
+    }
+
+    if (gameover) {
+      gravityTimer?.cancel();
+      gravityTimer = null;
+
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) => AlertDialog(
+          title: const Text('GAME OVER'),
+          content: const Text('exceeded the allowed play area'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      activeTetromino = ActiveTetromino(
+        type: TetrominoType.values[DateTime.now().millisecondsSinceEpoch % 7],
+        rotationIndex: 0,
+        position: Vector2(4, 0),
+      );
+    });
+  }
+
+  void hardDrop() {
+    Vector2 dropPos = activeTetromino.position;
+
+    while (!checkCollision(
+      dropPos + Vector2(0, 1),
+      activeTetromino.rotationIndex,
+    )) {
+      dropPos += Vector2(0, 1);
+    }
+
+    activeTetromino = ActiveTetromino(
+      type: activeTetromino.type,
+      rotationIndex: activeTetromino.rotationIndex,
+      position: dropPos,
+    );
+
+    fixTetromino();
   }
 
   @override
@@ -114,19 +137,32 @@ class _GamePreviewState extends State<GamePreview> {
             backgroundColor: Colors.white,
             child: const Icon(Icons.rotate_left, color: Colors.black),
           ),
+          const SizedBox(height: 8),
           FloatingActionButton(
             onPressed: moveTetrominoLeft,
             backgroundColor: Colors.white,
             child: const Icon(Icons.arrow_left_outlined),
-            ),
-            FloatingActionButton(
+          ),
+          const SizedBox(height: 8),
+          FloatingActionButton(
             onPressed: moveTetrominoRight,
             backgroundColor: Colors.white,
             child: const Icon(Icons.arrow_right_outlined),
-            ),
+          ),
+          const SizedBox(height: 8),
+          FloatingActionButton(
+            onPressed: softDrop,
+            backgroundColor: Colors.white,
+            child: const Icon(Icons.arrow_drop_down_outlined),
+          ),
+          const SizedBox(height: 8),
+          FloatingActionButton(
+            onPressed: hardDrop,
+            backgroundColor: Colors.white,
+            child: const Icon(Icons.vertical_align_bottom),
+          ),
         ],
       ),
-
     );
   }
 
@@ -138,10 +174,7 @@ class _GamePreviewState extends State<GamePreview> {
       final x = newPosition.x + block.x;
       final y = newPosition.y + block.y;
 
-      //Limites del tablero
       if (x < 0 || x >= 10 || y >= 26) return true;
-
-      //Colision otra ficha colocada
       if (y >= 0 && board[y.toInt()][x.toInt()] != null) return true;
     }
     return false;
@@ -149,8 +182,6 @@ class _GamePreviewState extends State<GamePreview> {
 
   void rotateTetromino() {
     final newRotation = (activeTetromino.rotationIndex + 1) % 4;
-
-    //Comprobar colisiones antes de rotar
     if (!checkCollision(activeTetromino.position, newRotation)) {
       setState(() {
         activeTetromino = ActiveTetromino(
@@ -163,9 +194,7 @@ class _GamePreviewState extends State<GamePreview> {
   }
 
   void moveTetrominoLeft() {
-    final newPosition = (activeTetromino.position + Vector2(-1, 0));
-
-    //Comprobar colisiones antes de desplazar
+    final newPosition = activeTetromino.position + Vector2(-1, 0);
     if (!checkCollision(newPosition, activeTetromino.rotationIndex)) {
       setState(() {
         activeTetromino = ActiveTetromino(
@@ -178,9 +207,20 @@ class _GamePreviewState extends State<GamePreview> {
   }
 
   void moveTetrominoRight() {
-    final newPosition = (activeTetromino.position + Vector2(1, 0));
+    final newPosition = activeTetromino.position + Vector2(1, 0);
+    if (!checkCollision(newPosition, activeTetromino.rotationIndex)) {
+      setState(() {
+        activeTetromino = ActiveTetromino(
+          type: activeTetromino.type,
+          rotationIndex: activeTetromino.rotationIndex,
+          position: newPosition,
+        );
+      });
+    }
+  }
 
-    //Comprobar colisiones antes de desplazar
+  void softDrop() {
+    final newPosition = activeTetromino.position + Vector2(0, 1);
     if (!checkCollision(newPosition, activeTetromino.rotationIndex)) {
       setState(() {
         activeTetromino = ActiveTetromino(
