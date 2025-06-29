@@ -40,6 +40,7 @@ class _GamePreviewState extends State<GamePreview> {
         fixTetromino();
       } else {
         setState(() {
+          deleteRow();
           activeTetromino = ActiveTetromino(
             type: activeTetromino.type,
             rotationIndex: activeTetromino.rotationIndex,
@@ -229,6 +230,35 @@ class _GamePreviewState extends State<GamePreview> {
           position: newPosition,
         );
       });
+    }
+  }
+
+  void deleteRow(){
+    int deleteRows = 0;
+
+    for(int y = board.length - 1; y >= 0; y--){
+      bool completeRow = true;
+
+      for(int x = 0; x < board[y].length; x++){
+        if(board[y][x] == null){
+          completeRow = false;
+          break;
+        }
+      }
+      if(completeRow){
+        //Eliminar la fila
+        board.removeAt(y);
+
+        //Insertar una fila vacia arriba
+        board.insert(0, List.generate(10, (_) => null));
+
+        deleteRows++;
+        y++;
+      }
+    }
+
+    if(deleteRows > 0){
+      debugPrint("Filas eliminadas: $deleteRows");
     }
   }
 }
