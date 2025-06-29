@@ -46,9 +46,9 @@ final Map<TetrominoType, TetrominoData> tetrominoDataMap = {
     color: Colors.green,
     rotations: [
       [Vector2(1, 0), Vector2(0, 0), Vector2(0, 1), Vector2(-1, 1)], // 0°
-      [Vector2(0, 1), Vector2(0, 0), Vector2(1, 0), Vector2(1, -1)], // 90°
+      [Vector2(0, -1), Vector2(0, 0), Vector2(1, 0), Vector2(1, 1)], // 90°
       [Vector2(1, -1), Vector2(0, -1), Vector2(0, 0), Vector2(-1, 0)], // 180°
-      [Vector2(-1, 1), Vector2(-1, 0), Vector2(0, 0), Vector2(0, -1)], // 270°
+      [Vector2(-1, -1), Vector2(-1, 0), Vector2(0, 0), Vector2(0, 1)], // 270°
     ],
   ),
 
@@ -58,9 +58,9 @@ final Map<TetrominoType, TetrominoData> tetrominoDataMap = {
     color: Colors.red,
     rotations: [
       [Vector2(-1, 0), Vector2(0, 0), Vector2(0, 1), Vector2(1, 1)], // 0°
-      [Vector2(0, -1), Vector2(0, 0), Vector2(1, 0), Vector2(1, 1)], // 90°
+      [Vector2(0, 1), Vector2(0, 0), Vector2(1, 0), Vector2(1, -1)], // 90°
       [Vector2(-1, -1), Vector2(0, -1), Vector2(0, 0), Vector2(1, 0)], // 180°
-      [Vector2(-1, -1), Vector2(-1, 0), Vector2(0, 0), Vector2(0, 1)], // 270°
+      [Vector2(-1, 1), Vector2(-1, 0), Vector2(0, 0), Vector2(0, -1)], // 270°
     ],
   ),
 
@@ -69,10 +69,10 @@ final Map<TetrominoType, TetrominoData> tetrominoDataMap = {
     type: TetrominoType.L,
     color: Colors.blueAccent,
     rotations: [
-      [Vector2(-1, 0), Vector2(0, 0), Vector2(1, 0), Vector2(1, 1)], // 0°
-      [Vector2(0, -1), Vector2(0, 0), Vector2(0, 1), Vector2(1, -1)], // 90°
-      [Vector2(-1, -1), Vector2(-1, 0), Vector2(0, 0), Vector2(1, 0)], // 180°
-      [Vector2(-1, 1), Vector2(0, -1), Vector2(0, 0), Vector2(0, 1)], // 270°
+      [Vector2(0, -1), Vector2(0, 0), Vector2(0, 1), Vector2(1, 1)], // 0°
+      [Vector2(-1, 1), Vector2(-1, 0), Vector2(0, 0), Vector2(1, 0)], // 90°
+      [Vector2(-1, -1), Vector2(0, -1), Vector2(0, 0), Vector2(0, 1)], // 180°
+      [Vector2(-1, 0), Vector2(0, 0), Vector2(1, 0), Vector2(1, -1)], // 270°
     ],
   ),
 
@@ -81,10 +81,10 @@ final Map<TetrominoType, TetrominoData> tetrominoDataMap = {
     type: TetrominoType.J,
     color: Colors.orange,
     rotations: [
-      [Vector2(-1, 0), Vector2(0, 0), Vector2(1, 0), Vector2(-1, 1)], // 0°
-      [Vector2(0, -1), Vector2(0, 0), Vector2(0, 1), Vector2(1, 1)], // 90°
-      [Vector2(-1, 0), Vector2(0, 0), Vector2(1, 0), Vector2(1, -1)], // 180°
-      [Vector2(0, -1), Vector2(0, 0), Vector2(0, 1), Vector2(-1, -1)], // 270°
+      [Vector2(0, -1), Vector2(0, 0), Vector2(0, 1), Vector2(-1, 1)], // 0°
+      [Vector2(-1, -1), Vector2(-1, 0), Vector2(0, 0), Vector2(1, 0)], // 90°
+      [Vector2(0, -1), Vector2(0, 0), Vector2(0, 1), Vector2(1, -1)], //180°
+      [Vector2(-1, 0), Vector2(0, 0), Vector2(1, 0), Vector2(1, 1)], //270°
     ],
   ),
 
