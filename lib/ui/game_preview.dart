@@ -16,6 +16,7 @@ class _GamePreviewState extends State<GamePreview> {
   late List<List<Color?>> board;
   late ActiveTetromino activeTetromino;
   Timer? gravityTimer;
+  int scoreCount = 0;
 
   @override
   void initState() {
@@ -40,7 +41,6 @@ class _GamePreviewState extends State<GamePreview> {
         fixTetromino();
       } else {
         setState(() {
-          deleteRow();
           activeTetromino = ActiveTetromino(
             type: activeTetromino.type,
             rotationIndex: activeTetromino.rotationIndex,
@@ -89,13 +89,55 @@ class _GamePreviewState extends State<GamePreview> {
       return;
     }
 
+    // 👇 Eliminar filas y sumar puntaje
+    final eliminadas = deleteRow();
     setState(() {
+      switch (eliminadas) {
+        case 1:
+          scoreCount += 10;
+          break;
+        case 2:
+          scoreCount += 20;
+          break;
+        case 3:
+          scoreCount += 30;
+          break;
+        case 4:
+          scoreCount += 40;
+          break;
+      }
+
+      // 👇 Nueva ficha
       activeTetromino = ActiveTetromino(
         type: TetrominoType.values[DateTime.now().millisecondsSinceEpoch % 7],
         rotationIndex: 0,
         position: Vector2(4, 0),
       );
     });
+  }
+
+  int deleteRow() {
+    int deleteRows = 0;
+
+    for (int y = board.length - 1; y >= 0; y--) {
+      bool completeRow = true;
+
+      for (int x = 0; x < board[y].length; x++) {
+        if (board[y][x] == null) {
+          completeRow = false;
+          break;
+        }
+      }
+
+      if (completeRow) {
+        board.removeAt(y);
+        board.insert(0, List.generate(10, (_) => null));
+        deleteRows++;
+        y++; // Revisar de nuevo la misma fila
+      }
+    }
+
+    return deleteRows;
   }
 
   void hardDrop() {
@@ -127,8 +169,20 @@ class _GamePreviewState extends State<GamePreview> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
-      body: Center(
-        child: Gameboard(board: board, activeTetromino: activeTetromino),
+      body: Column(
+        children: [
+          const SizedBox(height: 40),
+          Text(
+            'PUNTAJE: $scoreCount',
+            style: const TextStyle(color: Colors.white, fontSize: 20),
+          ),
+          const SizedBox(height: 20),
+          Expanded(
+            child: Center(
+              child: Gameboard(board: board, activeTetromino: activeTetromino),
+            ),
+          ),
+        ],
       ),
       floatingActionButton: Column(
         mainAxisSize: MainAxisSize.min,
@@ -230,35 +284,6 @@ class _GamePreviewState extends State<GamePreview> {
           position: newPosition,
         );
       });
-    }
-  }
-
-  void deleteRow(){
-    int deleteRows = 0;
-
-    for(int y = board.length - 1; y >= 0; y--){
-      bool completeRow = true;
-
-      for(int x = 0; x < board[y].length; x++){
-        if(board[y][x] == null){
-          completeRow = false;
-          break;
-        }
-      }
-      if(completeRow){
-        //Eliminar la fila
-        board.removeAt(y);
-
-        //Insertar una fila vacia arriba
-        board.insert(0, List.generate(10, (_) => null));
-
-        deleteRows++;
-        y++;
-      }
-    }
-
-    if(deleteRows > 0){
-      debugPrint("Filas eliminadas: $deleteRows");
     }
   }
 }
